@@ -1,0 +1,44 @@
+Public Declare Sub keybd_event Lib "user32.dll" (ByVal bVk As Byte, ByVal bScan As Byte, ByVal dwFlags As Long, ByVal dwExtraInfo As Long)
+Public Declare Function Findwindow Lib "USER32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpwindowname As String) As Long
+Public Declare Function FindWindowEx Lib "USER32" Alias "FindWindowExA" (ByVal hWndParent As Long, ByVal hwndChildAfter As Long, ByVal lpszClass As String, ByVal lpszWindow As String) As Long
+Public Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
+Public Const KEYEVENTF_EXTENDEDKEY = &H1    ''キーを押す
+Public Const KEYEVENTF_KEYUP = &H2          ''キーを放す
+Public Const VK_MENU = &H12
+Public Const VK_S = &H53
+
+Sub download()
+  'IE起動
+  With CreateObject("InternetExplorer.Application")
+    .navigate "http://market.jsda.or.jp/html/saiken/kehai/downloadResult.php"
+    .Visible = True
+    
+    'IE表示待機
+    While .readyState <> 4 Or .Busy:  DoEvents: Wend
+    While .document.readyState <> "complete": DoEvents: Wend
+      
+    '設定して、ダウンロードボタンを押す
+    With .document
+      .all("dataType")(0).Click
+      .all("dataForm")(0).Click
+      .all("dlDateYear").Value = Year(Date)
+      .all("dlDateMon").Value = Month(Date)
+      .all("dlDateDay").Value = Day(Date)
+      .forms(1).submit
+    End With
+    
+    'IEのセキュリティバーの表示を待つ
+    barHwnd = FindWindowEx(.Hwnd, 0, "Frame Notification Bar", vbNullString)
+    Do While barHwnd = 0
+      barHwnd = FindWindowEx(.Hwnd, 0, "Frame Notification Bar", vbNullString)
+      DoEvents
+    Loop
+    
+    'ALT ＋ S を押して保存する。
+    keybd_event VK_MENU, 0, KEYEVENTF_EXTENDEDKEY, 0
+    keybd_event VK_S, 0, KEYEVENTF_EXTENDEDKEY, 0
+    keybd_event VK_S, 0, KEYEVENTF_EXTENDEDKEY Or KEYEVENTF_KEYUP, 0
+    keybd_event VK_MENU, 0, KEYEVENTF_EXTENDEDKEY Or KEYEVENTF_KEYUP, 0
+  End With
+
+End Sub
