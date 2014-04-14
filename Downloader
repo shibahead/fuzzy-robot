@@ -34,6 +34,8 @@ Sub download()
       DoEvents
     Loop
     
+    sleep(1000)
+    
     'ALT ＋ S を押して保存する。
     keybd_event VK_MENU, 0, KEYEVENTF_EXTENDEDKEY, 0
     keybd_event VK_S, 0, KEYEVENTF_EXTENDEDKEY, 0
